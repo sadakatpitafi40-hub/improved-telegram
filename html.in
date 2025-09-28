@@ -1,115 +1,102 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ShortLink & Image Page</title>
-  <style>
-    :root{font-family:Inter,system-ui,Arial;margin:0;padding:0;color:#111}
-    body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(180deg,#f7f9fc,#eef3fb);}
-    .card{width:940px;max-width:94%;background:white;border-radius:12px;padding:28px;box-shadow:0 8px 30px rgba(18,38,63,0.08)}
-    header{display:flex;justify-content:space-between;align-items:center}
-    h1{margin:0;font-size:22px}
-    .lang-toggle{padding:8px 12px;border-radius:8px;border:1px solid #e6eef8;background:#fff;cursor:pointer}
-    .hero{display:flex;gap:22px;margin-top:18px}
-    .left{flex:1}
-    .right{width:340px}
-    img.preview{width:100%;height:220px;object-fit:cover;border-radius:10px;border:1px solid #f0f4fb}
-    .meta{margin-top:12px}
-    .meta input[type=text]{width:100%;padding:10px;border-radius:8px;border:1px solid #e2e8f0}
-    .row{display:flex;gap:8px;margin-top:8px}
-    button{padding:10px 12px;border-radius:8px;border:none;background:#0b76ef;color:white;cursor:pointer}
-    button.secondary{background:#f0f4f8;color:#07203b}
-    .short-output{margin-top:12px;padding:10px;border-radius:8px;background:#fbfdff;border:1px dashed #e6f0ff}
-    .small{font-size:13px;color:#556}
-    footer{margin-top:18px;font-size:13px;color:#445}
-    .title-edit{display:flex;gap:8px;align-items:center}
-    .title-edit input{font-size:18px;padding:8px;border-radius:8px;border:1px solid #e7eefb;width:100%}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Link Shortener Website</title>
+    <style>
+        /* This is CSS code to style the page */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #4a4a4a;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        input[type="url"] {
+            width: 80%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-  <div class="card">
-    <header>
-      <h1 id="pageTitle">ShortLink & Image Page</h1>
-      <div>
-        <button class="lang-toggle" id="toggleLang">English</button>
-      </div>
-    </header>
 
-    <div class="hero">
-      <div class="left">
-        <div class="title-edit">
-          <input id="titleInput" placeholder="Enter title here" value="My Example Title">
-          <button class="secondary" id="applyTitle">Apply</button>
-        </div>
+    <div class="container">
+        <h1>Welcome to My Website</h1>
+        <p>You can add a description here. This website has a free tool to shorten your links.</p>
 
-        <div class="meta">
-          <p class="small" id="desc">Add an image, add a title and create a short link easily. Use the language toggle to switch to English.</p>
+        <img src="https://placehold.co/600x300/007bff/ffffff?text=Your+Image+Here" alt="My Website Image">
 
-          <label class="small" for="imageUrl">Image URL</label>
-          <input type="text" id="imageUrl" value="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=000000">
-          <div class="row">
-            <button id="applyImage">Add / Update Image</button>
-            <button id="resetImage" class="secondary">Reset Image</button>
-          </div>
+        <h2>Free Link Shortener</h2>
+        <p>Paste your long URL below and click the button.</p>
 
-          <hr style="margin:14px 0;border:none;border-top:1px solid #eef3fb">
-
-          <label class="small" for="originalUrl">URL to shorten</label>
-          <input type="text" id="originalUrl" placeholder="https://example.com/article" />
-          <div class="row">
-            <button id="shortenBtn">Shorten</button>
-            <button id="copyBtn" class="secondary">Copy Short URL</button>
-          </div>
-
-          <div class="short-output" id="shortOutput" style="display:none">
-            <div><strong id="shortLabel"></strong></div>
-            <div class="small" id="shortHelp">This short link uses browser storage; to make it live on the web host it on a static domain.</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="right">
-        <img id="previewImage" class="preview" src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=000000" alt="Preview">
-        <p class="small" style="margin-top:10px">Preview of the selected image and page title.</p>
-      </div>
+        <form id="shortenerForm">
+            <input type="url" id="longUrlInput" placeholder="https://example.com/your-very-long-link" required>
+            <br>
+            <button type="submit">Shorten Link</button>
+        </form>
     </div>
 
-    <footer>
-      <div class="small">Tip: Save this HTML as a file and open it in a browser or host on GitHub Pages / Netlify to make it available online.</div>
-    </footer>
-  </div>
+    <script>
+        // This is JavaScript code to make the form work
+        document.getElementById('shortenerForm').addEventListener('submit', function(event) {
+            // Prevent the form from reloading the page
+            event.preventDefault();
 
-  <script>
-    // --- Short link logic (client-only using localStorage) ---
-    const storageKey = 'simple_shortlinks_v1';
+            // Get the long URL that the user entered
+            const longUrl = document.getElementById('longUrlInput').value;
 
-    function loadLinks(){
-      try{ return JSON.parse(localStorage.getItem(storageKey) || '{}'); }catch(e){return {}}}
-    function saveLinks(obj){ localStorage.setItem(storageKey, JSON.stringify(obj)); }
+            // Check if the input is not empty
+            if (longUrl) {
+                // Create the link for the TinyURL service
+                const tinyUrlService = `https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`;
 
-    function genId(len=6){ const chars='abcdefghijklmnopqrstuvwxyz0123456789'; let s=''; for(let i=0;i<len;i++) s+=chars[Math.floor(Math.random()*chars.length)]; return s; }
+                // Open the link in a new browser tab
+                // This will show the user their new short link
+                window.open(tinyUrlService, '_blank');
+            } else {
+                alert('Please enter a URL to shorten.');
+            }
+        });
+    </script>
 
-    // handle redirect when visiting a short hash like #s/abc123
-    (function handleRedirect(){
-      const h = location.hash || '';
-      if(h.startsWith('#s/')){
-        const id = h.slice(3);
-        const links = loadLinks();
-        if(links[id]){
-          // perform redirect
-          window.location.href = links[id];
-        } else {
-          alert('Short link not found in browser storage.');
-        }
-      }
-    })();
-
-    // UI elements
-    const originalUrl = document.getElementById('originalUrl');
-    const shortenBtn = document.getElementById('shortenBtn');
-    const shortOutput = document.getElementById('shortOutput');
-    const shortLabel = document.getElementById('shortLabel');
+</body>
+</html>    const shortLabel = document.getElementById('shortLabel');
     const copyBtn = document.getElementById('copyBtn');
     const imageUrl = document.getElementById('imageUrl');
     const previewImage = document.getElementById('previewImage');
