@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ShortLink & Image Page</title>
+  <style>
+    :root{font-family:Inter,system-ui,Arial;margin:0;padding:0;color:#111}
+    body{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(180deg,#f7f9fc,#eef3fb);}
+    .card{width:940px;max-width:94%;background:white;border-radius:12px;padding:28px;box-shadow:0 8px 30px rgba(18,38,63,0.08)}
+    header{display:flex;justify-content:space-between;align-items:center}
+    h1{margin:0;font-size:22px}
+    .lang-toggle{padding:8px 12px;border-radius:8px;border:1px solid #e6eef8;background:#fff;cursor:pointer}
+    .hero{display:flex;gap:22px;margin-top:18px;flex-wrap:wrap}
+    .left{flex:1;min-width:260px}
+    .right{width:340px;max-width:100%}
+    img.preview{width:100%;height:auto;max-height:240px;object-fit:contain;border-radius:10px;border:1px solid #f0f4fb;background:#fafafa}
+    .meta{margin-top:12px}
+    .meta input[type=text]{width:100%;padding:10px;border-radius:8px;border:1px solid #e2e8f0}
+    .row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+    button{padding:10px 12px;border-radius:8px;border:none;background:#0b76ef;color:white;cursor:pointer}
+    button.secondary{background:#f0f4f8;color:#07203b}
+    .short-output{margin-top:12px;padding:10px;border-radius:8px;background:#fbfdff;border:1px dashed #e6f0ff}
+    .small{font-size:13px;color:#556}
+    footer{margin-top:18px;font-size:13px;color:#445}
+    .title-edit{display:flex;gap:8px;align-items:center}
+    .title-edit input{font-size:18px;padding:8px;border-radius:8px;border:1px solid #e7eefb;width:100%}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <header>
+      <h1 id="pageTitle">ShortLink & Image Page</h1>
+      <div>
+        <button class="lang-toggle" id="toggleLang">English</button>
+      </div>
+    </header>
+
+    <div class="hero">
+      <div class="left">
+        <div class="title-edit">
+          <input id="titleInput" placeholder="Enter title here" value="My Example Title">
+          <button class="secondary" id="applyTitle">Apply</button>
+        </div>
+
+        <div class="meta">
+          <p class="small" id="desc">Add an image, add a title and create a short link easily. Use the language toggle to switch to English.</p>
+
+          <label class="small" for="imageUrl">Image URL</label>
+          <input type="text" id="imageUrl" value="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png">
+          <div class="row">
+            <button id="applyImage">Add / Update Image</button>
+            <button id="resetImage" class="secondary">Reset Image</button>
+          </div>
+
+          <hr style="margin:14px 0;border:none;border-top:1px solid #eef3fb">
+
+          <label class="small" for="originalUrl">URL to shorten</label>
+          <input type="text" id="originalUrl" placeholder="https://example.com/article" />
+          <div class="row">
+            <button id="shortenBtn">Shorten</button>
+            <button id="copyBtn" class="secondary">Copy Short URL</button>
+          </div>
+
+          <div class="short-output" id="shortOutput" style="display:none">
+            <div><strong id="shortLabel"></strong></div>
+            <div class="small" id="shortHelp">This short link uses browser storage; to make it live on the web host it on a static domain.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="right">
+        <img id="previewImage" class="preview" src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png" alt="Preview">
+        <p class="small" style="margin-top:10px">Preview of the selected image and page title.</p>
+      </div>
+    </div>
+
+    <footer>
+      <div class="small">Tip: Save this HTML as a file and open it in a browser or host on GitHub Pages / Netlify to make it available online.</div>
+    </footer>
+  </div>
+
+  <script>
+    const storageKey = 'simple_shortlinks_v1';
+    function loadLinks(){ try{ return JSON.parse(localStorage.getItem(storageKey) || '{}'); }catch(e){return {}}}
+    function saveLinks(obj){ localStorage.setItem(storageKey, JSON.stringify(obj)); }
+    function genId(len=6){ const chars='abcdefghijklmnopqrstuvwxyz0123456789'; let s=''; for(let i=0;i<len;i++) s+=chars[Math.floor(Math.random()*chars.length)]; return s; }
+
+    (function handleRedirect(){
+      const h = location.hash || '';
+      if(h.startsWith('#s/')){
+        const id = h.slice(3);
+        const links = loadLinks();
+        if(links[id]){ window.location.href = links[id]; }
+        else { alert('Short link not found in browser storage.'); }
+      }
+    })();
+
+    const originalUrl = document.getElementById('originalUrl');
+    const shortenBtn = document.getElementById('shortenBtn');
+    const shortOutput = document.getElementById('shortOutput');
+    const shortLabel = document.getElementById('shortLabel');
+    const copyBtn = document.getElementById('copyBtn');
+    const imageUrl = document.getElementById('imageUrl');
+    const previewImage = document.getElementById('previewImage');
+    const applyImage = document.getElementById('applyImage');
+    const resetImage = document.getElementById('resetImage');
+    const titleInput = document.getElementById('titleInput');
+    const applyTitle = document.getElementById('applyTitle');
+    const pageTitle = document.getElementById('pageTitle');
+    const desc = document.getElementById('desc');
+    const toggleLang = document.getElementById('toggleLang');
+
+    const texts = {
+      saraiki: {
+        titlePlaceholder: 'Apna title ethe pao',
+        desc: 'Image, title te short link asaani nal banaao. Language toggle naal English v dekho.' ,
+        shorten: 'Shorten',
+        copy: 'Short URL copy karo',
+        apply: 'Apply',
+        resetImage: 'Reset Image'
+      },
+      english: {
+        titlePlaceholder: 'Enter title here',
+        desc: 'Add an image, give a title and create a short link easily. Use the language toggle to switch to Saraiki.',
+        shorten: 'Shorten',
+        copy: 'Copy Short URL',
+        apply: 'Apply',
+        resetImage: 'Reset Image'
+      }
+    };
+
+    let currentLang = 'english';
+    function updateLangUI(){
+      const t = texts[currentLang];
+      titleInput.placeholder = t.titlePlaceholder;
+      desc.textContent = t.desc;
+      shortenBtn.textContent = t.shorten;
+      copyBtn.textContent = t.copy;
+      applyTitle.textContent = t.apply;
+      resetImage.textContent = t.resetImage;
+      toggleLang.textContent = currentLang === 'english' ? 'Saraiki' : 'English';
+    }
+
+    toggleLang.addEventListener('click', ()=>{
+      currentLang = currentLang === 'english' ? 'saraiki' : 'english';
+      updateLangUI();
+    });
+
+    applyTitle.addEventListener('click', ()=>{
+      pageTitle.textContent = titleInput.value || 'ShortLink & Image Page';
+      document.title = pageTitle.textContent;
+    });
+
+    applyImage.addEventListener('click', ()=>{
+      const url = imageUrl.value.trim();
+      if(url){
+        previewImage.src = url;
+        previewImage.onerror = ()=>{
+          alert('Image could not be loaded. Please use a direct image link (.jpg, .png).');
+          previewImage.src = 'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png';
+        };
+      }
+    });
+
+    resetImage.addEventListener('click', ()=>{
+      const def = 'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png';
+      previewImage.src = def;
+      imageUrl.value = def;
+    });
+
+    shortenBtn.addEventListener('click', ()=>{
+      const url = (originalUrl.value||'').trim();
+      if(!url){ alert('Please enter a URL to shorten.'); return; }
+      const links = loadLinks();
+      for(const k in links){ if(links[k] === url){ showShort(k); return; } }
+      let id = genId(6);
+      while(links[id]) id = genId(6);
+      links[id] = url;
+      saveLinks(links);
+      showShort(id);
+    });
+
+    function showShort(id){
+      const short = location.origin + location.pathname + '#s/' + id;
+      shortLabel.textContent = short;
+      shortOutput.style.display = 'block';
+    }
+
+    copyBtn.addEventListener('click', ()=>{
+      const txt = shortLabel.textContent || '';
+      if(!txt){ alert('No short link to copy'); return; }
+      navigator.clipboard.writeText(txt).then(()=>{
+        alert('Short link copied to clipboard');
+      }).catch(()=>alert('Copy failed — you can select and copy manually.'));
+    });
+
+    updateLangUI();
+    titleInput.value = pageTitle.textContent;
+  </script>
+</body>
+</html>
