@@ -11,13 +11,13 @@
     header{display:flex;justify-content:space-between;align-items:center}
     h1{margin:0;font-size:22px}
     .lang-toggle{padding:8px 12px;border-radius:8px;border:1px solid #e6eef8;background:#fff;cursor:pointer}
-    .hero{display:flex;gap:22px;margin-top:18px;flex-wrap:wrap}
-    .left{flex:1;min-width:260px}
-    .right{width:340px;max-width:100%}
-    img.preview{width:100%;height:auto;max-height:240px;object-fit:contain;border-radius:10px;border:1px solid #f0f4fb;background:#fafafa}
+    .hero{display:flex;gap:22px;margin-top:18px}
+    .left{flex:1}
+    .right{width:340px}
+    img.preview{width:100%;height:220px;object-fit:cover;border-radius:10px;border:1px solid #f0f4fb}
     .meta{margin-top:12px}
     .meta input[type=text]{width:100%;padding:10px;border-radius:8px;border:1px solid #e2e8f0}
-    .row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+    .row{display:flex;gap:8px;margin-top:8px}
     button{padding:10px 12px;border-radius:8px;border:none;background:#0b76ef;color:white;cursor:pointer}
     button.secondary{background:#f0f4f8;color:#07203b}
     .short-output{margin-top:12px;padding:10px;border-radius:8px;background:#fbfdff;border:1px dashed #e6f0ff}
@@ -47,7 +47,7 @@
           <p class="small" id="desc">Add an image, add a title and create a short link easily. Use the language toggle to switch to English.</p>
 
           <label class="small" for="imageUrl">Image URL</label>
-          <input type="text" id="imageUrl" value="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png">
+          <input type="text" id="imageUrl" value="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=000000">
           <div class="row">
             <button id="applyImage">Add / Update Image</button>
             <button id="resetImage" class="secondary">Reset Image</button>
@@ -70,7 +70,7 @@
       </div>
 
       <div class="right">
-        <img id="previewImage" class="preview" src="https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png" alt="Preview">
+        <img id="previewImage" class="preview" src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=000000" alt="Preview">
         <p class="small" style="margin-top:10px">Preview of the selected image and page title.</p>
       </div>
     </div>
@@ -81,21 +81,31 @@
   </div>
 
   <script>
+    // --- Short link logic (client-only using localStorage) ---
     const storageKey = 'simple_shortlinks_v1';
-    function loadLinks(){ try{ return JSON.parse(localStorage.getItem(storageKey) || '{}'); }catch(e){return {}}}
+
+    function loadLinks(){
+      try{ return JSON.parse(localStorage.getItem(storageKey) || '{}'); }catch(e){return {}}}
     function saveLinks(obj){ localStorage.setItem(storageKey, JSON.stringify(obj)); }
+
     function genId(len=6){ const chars='abcdefghijklmnopqrstuvwxyz0123456789'; let s=''; for(let i=0;i<len;i++) s+=chars[Math.floor(Math.random()*chars.length)]; return s; }
 
+    // handle redirect when visiting a short hash like #s/abc123
     (function handleRedirect(){
       const h = location.hash || '';
       if(h.startsWith('#s/')){
         const id = h.slice(3);
         const links = loadLinks();
-        if(links[id]){ window.location.href = links[id]; }
-        else { alert('Short link not found in browser storage.'); }
+        if(links[id]){
+          // perform redirect
+          window.location.href = links[id];
+        } else {
+          alert('Short link not found in browser storage.');
+        }
       }
     })();
 
+    // UI elements
     const originalUrl = document.getElementById('originalUrl');
     const shortenBtn = document.getElementById('shortenBtn');
     const shortOutput = document.getElementById('shortOutput');
@@ -111,6 +121,7 @@
     const desc = document.getElementById('desc');
     const toggleLang = document.getElementById('toggleLang');
 
+    // default texts in two languages (Saraiki-ish original + English translation)
     const texts = {
       saraiki: {
         titlePlaceholder: 'Apna title ethe pao',
@@ -131,6 +142,7 @@
     };
 
     let currentLang = 'english';
+
     function updateLangUI(){
       const t = texts[currentLang];
       titleInput.placeholder = t.titlePlaceholder;
@@ -153,26 +165,19 @@
     });
 
     applyImage.addEventListener('click', ()=>{
-      const url = imageUrl.value.trim();
-      if(url){
-        previewImage.src = url;
-        previewImage.onerror = ()=>{
-          alert('Image could not be loaded. Please use a direct image link (.jpg, .png).');
-          previewImage.src = 'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png';
-        };
-      }
+      previewImage.src = imageUrl.value || previewImage.src;
     });
 
     resetImage.addEventListener('click', ()=>{
-      const def = 'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png';
-      previewImage.src = def;
-      imageUrl.value = def;
+      previewImage.src = 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=000000';
+      imageUrl.value = previewImage.src;
     });
 
     shortenBtn.addEventListener('click', ()=>{
       const url = (originalUrl.value||'').trim();
       if(!url){ alert('Please enter a URL to shorten.'); return; }
       const links = loadLinks();
+      // avoid duplicates: if URL already exists, return existing id
       for(const k in links){ if(links[k] === url){ showShort(k); return; } }
       let id = genId(6);
       while(links[id]) id = genId(6);
@@ -195,7 +200,9 @@
       }).catch(()=>alert('Copy failed — you can select and copy manually.'));
     });
 
+    // initialize UI
     updateLangUI();
+    // load default title into placeholder
     titleInput.value = pageTitle.textContent;
   </script>
 </body>
